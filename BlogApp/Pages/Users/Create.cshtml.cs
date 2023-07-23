@@ -1,27 +1,44 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using BlogApp.Model;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
+using Microsoft.AspNetCore.Mvc.Rendering;
+using BlogApp.Data;
 
 namespace BlogApp.Pages.Users
 {
-	public class CreateModel : PageModel
+    public class CreateModel : PageModel
     {
-        [BindProperty]
-        public CreateUserCommand Input { get; set; }
-        private readonly UserService _service;
+        private readonly BlogApp.Data.BlogAppDbContext _context;
 
-        public CreateModel(UserService service)
+        public CreateModel(BlogApp.Data.BlogAppDbContext context)
         {
-            _service = service;
+            _context = context;
         }
 
-        public void OnGet()
+        public IActionResult OnGet()
         {
-            Input = new CreateUserCommand();
+            return Page();
+        }
+
+        [BindProperty]
+        public User User { get; set; } = default!;
+        
+
+        // To protect from overposting attacks, see https://aka.ms/RazorPagesCRUD
+        public async Task<IActionResult> OnPostAsync()
+        {
+          if (!ModelState.IsValid || _context.Users == null || User == null)
+            {
+                return Page();
+            }
+
+            _context.Users.Add(User);
+            await _context.SaveChangesAsync();
+
+            return RedirectToPage("./Index");
         }
     }
 }
